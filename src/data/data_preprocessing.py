@@ -62,8 +62,8 @@ def main():
         data_path=os.path.join("./data",'interim')
         os.makedirs(data_path,exist_ok=True)
 
-        train_process_data.to_csv(os.path.join(data_path,"train_preocessed.csv"),index=False)
-        test_process_data.to_csv(os.path.join(data_path,"test_preocessed.csv"),index=False)
+        train_process_data.to_csv(os.path.join(data_path,"train_processed.csv"),index=False)
+        test_process_data.to_csv(os.path.join(data_path,"test_processed.csv"),index=False)
 
         logging.info('Processed data saved to %s',data_path)
     except Exception as e:
