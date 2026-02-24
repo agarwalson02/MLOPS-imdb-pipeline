@@ -80,23 +80,46 @@ def save_model_info(run_id:str,model_path:str,file_path:str)->None:
     except Exception as e:
         raise MyException(f'Error occurred while saving the model info: {e}',sys)
 
+
 def main():
-    try:
-        clf=load_model("./models/model.pkl")
-        test_data=load_data("./data/processed/test_bow.csv")
+    mlflow.set_experiment("my-dvc-pipeline")
+    with mlflow.start_run() as run:  # Start an MLflow run
+        try:
+            clf = load_model('./models/model.pkl')
+            test_data = load_data('./data/processed/test_bow.csv')
+            
+            X_test = test_data.iloc[:, :-1].values
+            y_test = test_data.iloc[:, -1].values
 
-        X_test=test_data.iloc[:,:-1].values
-        y_test=test_data.iloc[:,-1].values
+            metrics = evaluate_model(clf, X_test, y_test)
+            
+            save_metrics(metrics, 'reports/metrics.json')
+            
+            # Log metrics to MLflow
+            for metric_name, metric_value in metrics.items():
+                mlflow.log_metric(metric_name, metric_value)
+            
+            # Log model parameters to MLflow
+            if hasattr(clf, 'get_params'):
+                params = clf.get_params()
+                for param_name, param_value in params.items():
+                    mlflow.log_param(param_name, param_value)
+            
+            # Log model to MLflow
+            mlflow.sklearn.log_model(clf, "model")
+            
+            # Save model info
+            save_model_info(run.info.run_id, "model", 'reports/experiment_info.json')
+            
+            # Log the metrics file to MLflow
+            mlflow.log_artifact('reports/metrics.json')
 
-        metrics=evaluate_model(clf,X_test,y_test)
-        
-        save_metrics(metrics,'reports/metrics.json')
 
-    except Exception as e:
-        raise MyException(f'Failed to complete the model evaluation process {e}',sys)
+        except Exception as e:
+            raise MyException(f'Failed to complete the model evaluation process {e}',sys)
 
 
-if __name__=="__main__":
+if __name__=="__main__":    
     main()
 
 
