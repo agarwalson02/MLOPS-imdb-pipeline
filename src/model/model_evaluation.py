@@ -81,42 +81,92 @@ def save_model_info(run_id:str,model_path:str,file_path:str)->None:
         raise MyException(f'Error occurred while saving the model info: {e}',sys)
 
 
+# def main():
+#     mlflow.set_experiment("my-dvc-pipeline")
+#     with mlflow.start_run() as run:  # Start an MLflow run
+#         try:
+#             clf = load_model('./models/model.pkl')
+#             test_data = load_data('./data/processed/test_bow.csv')
+            
+#             X_test = test_data.iloc[:, :-1].values
+#             y_test = test_data.iloc[:, -1].values
+
+#             metrics = evaluate_model(clf, X_test, y_test)
+            
+#             save_metrics(metrics, 'reports/metrics.json')
+            
+#             # Log metrics to MLflow
+#             for metric_name, metric_value in metrics.items():
+#                 mlflow.log_metric(metric_name, metric_value)
+            
+#             # Log model parameters to MLflow
+#             if hasattr(clf, 'get_params'):
+#                 params = clf.get_params()
+#                 for param_name, param_value in params.items():
+#                     mlflow.log_param(param_name, param_value)
+            
+#             # Log model to MLflow
+#             mlflow.sklearn.log_model(clf,artifact_path="model")
+            
+#             # Save model info
+#             save_model_info(run.info.run_id, "model", 'reports/experiment_info.json')
+            
+#             # Log the metrics file to MLflow
+#             mlflow.log_artifact('reports/metrics.json')
+
+
+#         except Exception as e:
+#             raise MyException(f'Failed to complete the model evaluation process {e}',sys)
+
+
 def main():
-    mlflow.set_experiment("my-dvc-pipeline")
-    with mlflow.start_run() as run:  # Start an MLflow run
-        try:
+    try:
+        mlflow.set_experiment("my-dvc-pipeline")
+
+        with mlflow.start_run() as run:
+
+            # ---- Load ----
             clf = load_model('./models/model.pkl')
             test_data = load_data('./data/processed/test_bow.csv')
-            
+
             X_test = test_data.iloc[:, :-1].values
             y_test = test_data.iloc[:, -1].values
 
+            # ---- Evaluate ----
             metrics = evaluate_model(clf, X_test, y_test)
-            
+
             save_metrics(metrics, 'reports/metrics.json')
-            
-            # Log metrics to MLflow
+
+            # ---- Log metrics ----
             for metric_name, metric_value in metrics.items():
                 mlflow.log_metric(metric_name, metric_value)
-            
-            # Log model parameters to MLflow
+
+            # ---- Log parameters ----
             if hasattr(clf, 'get_params'):
                 params = clf.get_params()
                 for param_name, param_value in params.items():
                     mlflow.log_param(param_name, param_value)
-            
-            # Log model to MLflow
-            mlflow.sklearn.log_model(clf, "model")
-            
-            # Save model info
-            save_model_info(run.info.run_id, "model", 'reports/experiment_info.json')
-            
-            # Log the metrics file to MLflow
+
+            # ---- Log model properly ----
+            mlflow.sklearn.log_model(
+                clf,
+                artifact_path="model",
+                registered_model_name="my_model"
+            )
+
+            # ---- Log artifacts ----
             mlflow.log_artifact('reports/metrics.json')
 
+            # Store run_id BEFORE exiting context
+            run_id = run.info.run_id
 
-        except Exception as e:
-            raise MyException(f'Failed to complete the model evaluation process {e}',sys)
+        # 🔥 IMPORTANT: this is outside the run block
+        save_model_info(run_id, "model", 'reports/experiment_info.json')
+
+        logging.info(f"Run completed successfully with run_id: {run_id}")
+
+    except Exception as e:
+        raise MyException(f'Failed to complete the model evaluation process {e}', sys)
 
 
 if __name__=="__main__":    

@@ -70,9 +70,9 @@ def save_data(train_data:pd.DataFrame,test_data:pd.DataFrame,data_path:str)->Non
 
 def main():
     try:
-        # params=load_params(params_path='params.yaml')
-        # test_size=params['data_ingestion']['test_size']
-        test_size=0.2
+        params=load_params(params_path='params.yaml')
+        test_size=params['data_ingestion']['test_size']
+        # test_size=0.2
 
         df = load_data(data_url=os.path.join('notebooks', 'data.csv'))
 
