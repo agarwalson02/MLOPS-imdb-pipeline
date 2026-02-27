@@ -164,12 +164,27 @@ def main():
                 for param_name, param_value in params.items():
                     mlflow.log_param(param_name, param_value)
 
-            # ---- Log model properly ----
+            # ---- Log and Register model ----
             mlflow.sklearn.log_model(
                 clf,
                 artifact_path="model",
                 registered_model_name="my_model"
             )
+
+            # Transition it to "Staging"
+            client = mlflow.MlflowClient()
+            latest_version_info = client.get_latest_versions("my_model", stages=["None"])
+            
+            if latest_version_info:
+                latest_version = latest_version_info[0].version
+                client.transition_model_version_stage(
+                    name="my_model",
+                    version=latest_version,
+                    stage="Staging"
+                )
+                logging.info(f"Model version {latest_version} registered and transitioned to Staging.")
+            else:
+                logging.warning("Could not find the newly registered model version to transition to Staging.")
 
             # ---- Log artifacts ----
             mlflow.log_artifact('reports/metrics.json')
