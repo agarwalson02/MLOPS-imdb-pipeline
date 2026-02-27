@@ -10,6 +10,7 @@ import mlflow.sklearn
 from src.logger import logging
 from src.exception import MyException
 import dagshub
+import os
 
 # -------------------------------------------------------------------------------------
 # Set up DagsHub credentials for MLflow tracking
