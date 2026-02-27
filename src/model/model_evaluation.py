@@ -11,8 +11,24 @@ from src.logger import logging
 from src.exception import MyException
 import dagshub
 
-mlflow.set_tracking_uri("https://dagshub.com/agarwalson02/MLOPS-imdb-pipeline.mlflow")
-dagshub.init(repo_owner='agarwalson02',repo_name='MLOPS-imdb-pipeline',mlflow=True)
+# -------------------------------------------------------------------------------------
+# Set up DagsHub credentials for MLflow tracking
+dagshub_token = os.getenv("CAPSTONE_TEST")
+if not dagshub_token:
+    raise EnvironmentError("CAPSTONE_TEST environment variable is not set")
+
+os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+
+dagshub_url = "https://dagshub.com"
+repo_owner = "agarwalson02"
+repo_name = "MLOPS-imdb-pipeline"
+
+# Set up MLflow tracking URI
+mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
+
+# mlflow.set_tracking_uri("https://dagshub.com/agarwalson02/MLOPS-imdb-pipeline.mlflow")
+# dagshub.init(repo_owner='agarwalson02',repo_name='MLOPS-imdb-pipeline',mlflow=True)
 
 def load_model(file_path: str):
     """Load the trained model from a file"""
