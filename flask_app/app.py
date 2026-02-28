@@ -15,12 +15,17 @@ import warnings
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore")
 
+lemmatizer = WordNetLemmatizer()
+
 def lemmatization(text):
     """Lemmatize the text."""
-    lemmatizer = WordNetLemmatizer()
-    text = text.split()
-    text = [lemmatizer.lemmatize(word) for word in text]
-    return " ".join(text)
+    try:
+        text = text.split()
+        text = [lemmatizer.lemmatize(word) for word in text]
+        return " ".join(text)
+    except Exception as e:
+        print(f"Error in lemmatization: {e}")
+        return " ".join(text)
 
 def remove_stop_words(text):
     """Remove stop words from the text."""
