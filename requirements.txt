@@ -175,4 +175,5 @@ zc.lockfile
 zipp
 prometheus_client
 
+pipreqs>=0.4.13
 -e .
